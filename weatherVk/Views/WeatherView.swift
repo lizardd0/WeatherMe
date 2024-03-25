@@ -6,6 +6,7 @@
 //
 
 import UIKit
+import CoreLocation
 
 final class WeatherViewController: UIViewController {
     private enum Constants {
@@ -16,30 +17,29 @@ final class WeatherViewController: UIViewController {
     var locationManager = LocationManager.shared
     var weatherManager = WeatherManager()
     var weather: ResponseBody?
+    var forecast: DailyResponseBody?
     private var weatherTodayView = WeatherTodayView()
     
-    private let activityIndicator = UIActivityIndicatorView(style: .large)
     
     private var weeklyLabel = UILabel()
     
     private var weekTableView = UITableView(frame: .zero, style: .plain)
+    
+    private let geocoder = CLGeocoder()
+    
+    private var placeLabel = UILabel()
     
     override func viewDidLoad() {
         super.viewDidLoad()
         
         view.backgroundColor = .systemBackground
         
-        activityIndicator.translatesAutoresizingMaskIntoConstraints = false
-        activityIndicator.color = .gray
-        activityIndicator.startAnimating()
-        view.addSubview(activityIndicator)
-        
-        NSLayoutConstraint.activate([
-            activityIndicator.centerXAnchor.constraint(equalTo: view.centerXAnchor),
-            activityIndicator.centerYAnchor.constraint(equalTo: view.centerYAnchor)
-        ])
-        
         loadWeather()
+//        loadForecast()
+        
+        configurePlaceLabel()
+        view.addSubview(placeLabel)
+        
         view.addSubview(weatherTodayView)
         
         configureWeeklyLabel()
@@ -57,7 +57,7 @@ final class WeatherViewController: UIViewController {
                 if let weatherData = try? await weatherManager.getWeather(latitude: locationManager.location?.latitude ?? 0, longitude: locationManager.location?.longitude ?? 0) {
                     weather = weatherData
                     weatherTodayView.getWeatherData(weatherData)
-                    activityIndicator.stopAnimating() // Останавливаем индикатор загрузки
+
                 } else {
                     print("Weather data is nil")
                 }
@@ -65,6 +65,49 @@ final class WeatherViewController: UIViewController {
                 print("Failed to fetch data!")
             }
         }
+    }
+    
+    private func loadForecast() {
+        Task {
+            do {
+                if let forecastData = try? await weatherManager.getForecast(latitude: locationManager.location?.latitude ?? 0, longitude: locationManager.location?.longitude ?? 0) {
+                    forecast = forecastData
+                } else {
+                    print("Forecast data is nil")
+                }
+            } catch {
+                print("Failed to fetch data!")
+            }
+        }
+    }
+    
+    private func configurePlaceLabel() {
+        if let location = locationManager.location {
+            getLocationName(from: location) { locationName in
+                if let locationName = locationName {
+                    self.placeLabel.attributedText = self.attributedTextLabel("mappin.and.ellipse", locationName)
+                } else {
+                    self.placeLabel.attributedText = self.attributedTextLabel("mappin.and.ellipse", "")
+                }
+            }
+        }
+        
+        placeLabel.translatesAutoresizingMaskIntoConstraints = false
+    }
+    
+    private func attributedTextLabel(_ image: String, _ text: String) -> NSMutableAttributedString {
+        let fullString = NSMutableAttributedString()
+        let myAttribute = [ NSAttributedString.Key.font: UIFont(name: Constants.helveticaLight, size: 20)!, NSAttributedString.Key.foregroundColor: UIColor.black ]
+        let textString = NSAttributedString(string: text, attributes: myAttribute)
+        let attachment = NSTextAttachment()
+        let image = UIImage(systemName: image)
+        attachment.image = image
+        fullString.append(NSAttributedString(attachment: attachment))
+        fullString.append(textString)
+        
+        
+        
+        return fullString
     }
     
     private func configureWeeklyLabel() {
@@ -86,9 +129,12 @@ final class WeatherViewController: UIViewController {
     
     private func configureConstraints() {
         NSLayoutConstraint.activate([
+            placeLabel.leadingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.leadingAnchor, constant: 15),
+            placeLabel.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: 20),
+            
             weatherTodayView.centerXAnchor.constraint(equalTo: view.centerXAnchor),
-            weatherTodayView.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: 60),
-            weatherTodayView.heightAnchor.constraint(equalToConstant: 210),
+            weatherTodayView.topAnchor.constraint(equalTo: placeLabel.bottomAnchor, constant: 30),
+            weatherTodayView.heightAnchor.constraint(equalToConstant: 240),
             weatherTodayView.widthAnchor.constraint(equalToConstant: 350),
             
             weeklyLabel.centerXAnchor.constraint(equalTo: view.centerXAnchor),
@@ -114,12 +160,36 @@ extension WeatherViewController: UITableViewDelegate, UITableViewDataSource {
             return UITableViewCell()
         }
         
+        cell.getWeatherData(forecast?.list[indexPath.row])
         
-//        cell.textLabel?.text = "\(indexPath.row)"
         return cell
     }
     
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         tableView.deselectRow(at: indexPath, animated: true)
+    }
+}
+
+
+extension WeatherViewController {
+    func getLocationName(from coordinate: CLLocationCoordinate2D, completion: @escaping (String?) -> Void) {
+        let location = CLLocation(latitude: coordinate.latitude, longitude: coordinate.longitude)
+        
+        geocoder.reverseGeocodeLocation(location) { placemarks, error in
+            guard error == nil else {
+                print("Reverse geocoding failed with error: \(error!.localizedDescription)")
+                completion(nil)
+                return
+            }
+            
+            guard let placemark = placemarks?.first else {
+                print("No placemarks found")
+                completion(nil)
+                return
+            }
+            
+            let locationName = placemark.locality ?? placemark.name
+            completion(locationName)
+        }
     }
 }

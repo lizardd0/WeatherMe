@@ -23,8 +23,6 @@ final class OneDayWeatherCell: UITableViewCell {
     override init(style: UITableViewCell.CellStyle, reuseIdentifier: String?) {
         super.init(style: style, reuseIdentifier: reuseIdentifier)
         
-//        translatesAutoresizingMaskIntoConstraints = false
-        
         configureWeatherStack()
         contentView.addSubview(weatherStack)
         
@@ -37,17 +35,48 @@ final class OneDayWeatherCell: UITableViewCell {
     required init?(coder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
     }
-    //    func getWeatherData
+    
+    func getWeatherData(_ data: OndeDayResponse?) {
+        guard let weather = data else {
+            weatherIcon.image = UIImage(systemName: "sun.max.fill")
+            weatherLabel.text = "--"
+            minTemperature.text = "--°"
+            maxTemperature.text = "--°"
+            
+            return
+        }
+        
+        switch data?.weather[0].main {
+        case WeatherTypes.Rain.rawValue:
+            weatherIcon.image = UIImage(systemName: "cloud.rain.fill")
+        case WeatherTypes.Clouds.rawValue:
+            weatherIcon.image = UIImage(systemName: "cloud.fill")
+        case WeatherTypes.Clear.rawValue:
+            weatherIcon.image = UIImage(systemName: "sun.max.fill")
+        case WeatherTypes.Thunderstorm.rawValue:
+            weatherIcon.image = UIImage(systemName: "cloud.bolt.fill")
+        case WeatherTypes.Drizzle.rawValue:
+            weatherIcon.image = UIImage(systemName: "cloud.drizzle.fill")
+        case WeatherTypes.Snow.rawValue:
+            weatherIcon.image = UIImage(systemName: "snowflake")
+        case WeatherTypes.Atmosphere.rawValue:
+            weatherIcon.image = UIImage(systemName: "cloud.fog.fill")
+        default:
+            weatherIcon.image = UIImage(systemName: "rainbow")
+        }
+        
+        weatherLabel.text = data?.weather[0].description
+        minTemperature.text = "\(data?.temp.min)"
+        maxTemperature.text = "\(data?.temp.max)"
+    }
     
     private func configureWeatherIcon() {
-        weatherIcon.image = UIImage(systemName: "sun.max.fill")
         weatherIcon.contentMode = .scaleAspectFill
         weatherIcon.tintColor = .black
         weatherIcon.translatesAutoresizingMaskIntoConstraints = false
     }
     
     private func configureWeatherLabel() {
-        weatherLabel.text = "Clear"
         weatherLabel.font = UIFont(name: Constants.helveticaLight, size: 20)
         weatherLabel.textColor = .black
         weatherLabel.translatesAutoresizingMaskIntoConstraints = false
@@ -66,12 +95,10 @@ final class OneDayWeatherCell: UITableViewCell {
     }
     
     private func configureMinMaxLabel() {
-        minTemperature.text = "5°"
         minTemperature.font = UIFont(name: Constants.helveticaLight, size: 18)
         minTemperature.textColor = .black
         minTemperature.translatesAutoresizingMaskIntoConstraints = false
         
-        maxTemperature.text = "0°"
         maxTemperature.font = UIFont(name: Constants.helveticaLight, size: 14)
         maxTemperature.textColor = .black
         maxTemperature.translatesAutoresizingMaskIntoConstraints = false
@@ -89,9 +116,7 @@ final class OneDayWeatherCell: UITableViewCell {
     }
     
     private func configureConstraints() {
-        NSLayoutConstraint.activate([
-            contentView.heightAnchor.constraint(equalToConstant: 60),
-            
+        NSLayoutConstraint.activate([            
             weatherStack.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: 10),
             weatherStack.centerYAnchor.constraint(equalTo: contentView.centerYAnchor),
 

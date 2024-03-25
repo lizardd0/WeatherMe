@@ -36,6 +36,7 @@ final class WelcomeViewController: UIViewController {
         view.addSubview(activityIndicator)
         
         configureConstraints()
+        
     }
     
     
@@ -55,39 +56,29 @@ final class WelcomeViewController: UIViewController {
         shareLocationButton.translatesAutoresizingMaskIntoConstraints = false
     }
     
-//    @objc func getCurrentLocation() {
-//        activityIndicator.startAnimating()
-//        DispatchQueue.main.async {
-//            self.locationManager.requestLocation()
-//        }
-//        welcomeLabel.isHidden = true
-//        shareLocationButton.isHidden = true
-//        if let latitude = locationManager.location?.latitude,
-//           let longitude = locationManager.location?.longitude {
-//            let weatherViewController = WeatherViewController()
-//            self.present(weatherViewController, animated: true)
-//        }
-//    }
     
     @objc func getCurrentLocation() {
-//        activityIndicator.startAnimating() // Старт индикатора загрузки
-        
-        locationManager.requestLocation()
-        
-        if let location = locationManager.location {
-            let weatherViewController = WeatherViewController()
-            self.present(weatherViewController, animated: true)
+        welcomeLabel.isHidden = true
+        shareLocationButton.isHidden = true
+        activityIndicator.startAnimating()
+        locationManager.requestLocation { [weak self] coordinate in
+            guard let coordinate = coordinate else {
+                self?.activityIndicator.stopAnimating()
+                print("Failed to get user location")
+                return
+            }
             
-            // Остановка и скрытие индикатора загрузки
-            activityIndicator.stopAnimating()
+            self?.locationManager.location = coordinate
+            self?.activityIndicator.stopAnimating()
+            let weatherViewController = WeatherViewController()
+            self?.present(weatherViewController, animated: true)
         }
-        
     }
-    
-    
+
     
     private func configureActivityIndicator() {
         activityIndicator.color = .gray
+        activityIndicator.hidesWhenStopped = true
         activityIndicator.translatesAutoresizingMaskIntoConstraints = false
     }
     
@@ -104,4 +95,3 @@ final class WelcomeViewController: UIViewController {
         ])
     }
 }
-

@@ -7,6 +7,16 @@
 
 import UIKit
 
+enum WeatherTypes: String {
+    case Rain
+    case Clouds
+    case Clear
+    case Thunderstorm
+    case Drizzle
+    case Snow
+    case Atmosphere
+}
+
 final class WeatherTodayView: UIView {
     private enum Constants {
         static let todayLabel = "Today"
@@ -17,16 +27,6 @@ final class WeatherTodayView: UIView {
         static let windIcon = "wind"
     }
     
-    private enum WeatherTypes: String {
-        case rain
-        case clouds
-        case clear
-        case thunderstorm
-        case drizzle
-        case snow
-        case atmosphere
-    }
-    
     var weather: ResponseBody?
     
     var todayLabel = UILabel()
@@ -34,6 +34,7 @@ final class WeatherTodayView: UIView {
     var temperaureIcon = UIImageView()
     var temperatureAndIconStack = UIStackView()
     var weatherLabel = UILabel()
+    var dateLabel = UILabel()
     
     var humidityLabel = UILabel()
     var precipitationLabel = UILabel()
@@ -49,6 +50,9 @@ final class WeatherTodayView: UIView {
         
         configureTodayLabel()
         addSubview(todayLabel)
+        
+        configureDateLabel()
+        addSubview(dateLabel)
         
         configureTemperatureLabel()
         
@@ -81,19 +85,19 @@ final class WeatherTodayView: UIView {
         }
         
         switch weatherData.weather[0].main {
-        case WeatherTypes.rain.rawValue:
+        case WeatherTypes.Rain.rawValue:
             temperaureIcon.image = UIImage(systemName: "cloud.rain.fill")
-        case WeatherTypes.clouds.rawValue:
+        case WeatherTypes.Clouds.rawValue:
             temperaureIcon.image = UIImage(systemName: "cloud.fill")
-        case WeatherTypes.clear.rawValue:
+        case WeatherTypes.Clear.rawValue:
             temperaureIcon.image = UIImage(systemName: "sun.max.fill")
-        case WeatherTypes.thunderstorm.rawValue:
+        case WeatherTypes.Thunderstorm.rawValue:
             temperaureIcon.image = UIImage(systemName: "cloud.bolt.fill")
-        case WeatherTypes.drizzle.rawValue:
-            temperaureIcon.image = UIImage(systemName: "cloud.fill")
-        case WeatherTypes.snow.rawValue:
+        case WeatherTypes.Drizzle.rawValue:
+            temperaureIcon.image = UIImage(systemName: "cloud.drizzle.fill")
+        case WeatherTypes.Snow.rawValue:
             temperaureIcon.image = UIImage(systemName: "snowflake")
-        case WeatherTypes.atmosphere.rawValue:
+        case WeatherTypes.Atmosphere.rawValue:
             temperaureIcon.image = UIImage(systemName: "cloud.fog.fill")
         default:
             temperaureIcon.image = UIImage(systemName: "rainbow")
@@ -116,6 +120,16 @@ final class WeatherTodayView: UIView {
         todayLabel.font = UIFont(name: Constants.helveticaLight, size: 30)
         todayLabel.textColor = .black
         todayLabel.translatesAutoresizingMaskIntoConstraints = false
+    }
+    
+    private func configureDateLabel() {
+        let getDate = Date()
+        let dateFormatter = DateFormatter()
+        dateFormatter.dateFormat = "dd.MM.yyyy"
+        dateLabel.text = dateFormatter.string(from: getDate)
+        dateLabel.font = UIFont(name: Constants.helveticaLight, size: 20)
+        dateLabel.textColor = .black
+        dateLabel.translatesAutoresizingMaskIntoConstraints = false
     }
     
     private func attributedTextLabel(_ image: String, _ text: String) -> NSMutableAttributedString {
@@ -160,17 +174,10 @@ final class WeatherTodayView: UIView {
     }
     
     private func configureWeatherOptionsStack() {
-//        var humidity = attributedTextLabel(Constants.humidityIcon, "90%")
-//        var precipitation = attributedTextLabel(Constants.precipitation, "6%")
-//        var wind = attributedTextLabel(Constants.windIcon, "19 km/h")
-        
-//        humidityLabel.attributedText = humidity
         humidityLabel.translatesAutoresizingMaskIntoConstraints = false
         
-//        precipitationLabel.attributedText = precipitation
         precipitationLabel.translatesAutoresizingMaskIntoConstraints = false
         
-//        windLabel.attributedText = wind
         windLabel.translatesAutoresizingMaskIntoConstraints = false
         
         weatherOptionsStack.addArrangedSubview(humidityLabel)
@@ -187,8 +194,11 @@ final class WeatherTodayView: UIView {
             todayLabel.centerXAnchor.constraint(equalTo: super.centerXAnchor),
             todayLabel.topAnchor.constraint(equalTo: super.topAnchor, constant: 10),
             
+            dateLabel.centerXAnchor.constraint(equalTo: super.centerXAnchor),
+            dateLabel.topAnchor.constraint(equalTo:todayLabel.bottomAnchor, constant: 10),
+            
             temperatureAndIconStack.centerXAnchor.constraint(equalTo: super.centerXAnchor),
-            temperatureAndIconStack.topAnchor.constraint(equalTo: todayLabel.bottomAnchor, constant: 10),
+            temperatureAndIconStack.topAnchor.constraint(equalTo: dateLabel.bottomAnchor, constant: 10),
             
             weatherLabel.centerXAnchor.constraint(equalTo: super.centerXAnchor),
             weatherLabel.topAnchor.constraint(equalTo: temperatureAndIconStack.bottomAnchor, constant: 10),
@@ -198,3 +208,4 @@ final class WeatherTodayView: UIView {
         ])
     }
 }
+

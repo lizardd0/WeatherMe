@@ -7,16 +7,6 @@
 
 import Foundation
 
-//struct Response: Decodable {
-//    var coord: CoordinatesResponse
-//    var weather: [WeatherResponse]
-//    var main: MainResponse
-//    var name: String
-//    var wind: WindResponse
-//    var rain: RainResponse
-//    var clouds: CloudsResponse
-//}
-
 struct ResponseBody: Decodable {
     var coord: CoordinatesResponse
     var weather: [WeatherResponse]
