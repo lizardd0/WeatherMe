@@ -50,7 +50,6 @@ final class WeatherManager {
             
             throw WeatherError.failedToFetchData
         }
-        print(response)
         
         guard (response as? HTTPURLResponse)?.statusCode == 200 else {
             fatalError("Failed getting forecast data")
@@ -58,7 +57,6 @@ final class WeatherManager {
         
         let decodedData =  try JSONDecoder().decode(DailyResponseBody.self, from: data)
         
-//        print(decodedData)
         
         return decodedData
     }
