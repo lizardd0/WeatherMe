@@ -35,7 +35,7 @@ final class WeatherViewController: UIViewController {
         view.backgroundColor = .systemBackground
         
         loadWeather()
-//        loadForecast()
+        loadForecast()
         
         configurePlaceLabel()
         view.addSubview(placeLabel)
@@ -72,6 +72,7 @@ final class WeatherViewController: UIViewController {
             do {
                 if let forecastData = try? await weatherManager.getForecast(latitude: locationManager.location?.latitude ?? 0, longitude: locationManager.location?.longitude ?? 0) {
                     forecast = forecastData
+                    weekTableView.reloadData()
                 } else {
                     print("Forecast data is nil")
                 }
@@ -152,7 +153,7 @@ final class WeatherViewController: UIViewController {
 
 extension WeatherViewController: UITableViewDelegate, UITableViewDataSource {
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        7
+        5
     }
     
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {

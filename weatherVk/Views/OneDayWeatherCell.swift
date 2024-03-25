@@ -66,8 +66,12 @@ final class OneDayWeatherCell: UITableViewCell {
         }
         
         weatherLabel.text = data?.weather[0].description
-        minTemperature.text = "\(data?.temp.min)"
-        maxTemperature.text = "\(data?.temp.max)"
+        if let min = data?.main.temp_min {
+            minTemperature.text = "\(min)°"
+        }
+        if let max = data?.main.temp_max {
+            maxTemperature.text = "\(max)°"
+        }
     }
     
     private func configureWeatherIcon() {
@@ -95,11 +99,11 @@ final class OneDayWeatherCell: UITableViewCell {
     }
     
     private func configureMinMaxLabel() {
-        minTemperature.font = UIFont(name: Constants.helveticaLight, size: 18)
+        minTemperature.font = UIFont(name: Constants.helveticaLight, size: 14)
         minTemperature.textColor = .black
         minTemperature.translatesAutoresizingMaskIntoConstraints = false
         
-        maxTemperature.font = UIFont(name: Constants.helveticaLight, size: 14)
+        maxTemperature.font = UIFont(name: Constants.helveticaLight, size: 18)
         maxTemperature.textColor = .black
         maxTemperature.translatesAutoresizingMaskIntoConstraints = false
     }
@@ -107,8 +111,8 @@ final class OneDayWeatherCell: UITableViewCell {
     private func configureTemperatureStack() {
         configureMinMaxLabel()
         
-        temperatureStack.addArrangedSubview(minTemperature)
         temperatureStack.addArrangedSubview(maxTemperature)
+        temperatureStack.addArrangedSubview(minTemperature)
         
         temperatureStack.axis = .vertical
         temperatureStack.spacing = 4

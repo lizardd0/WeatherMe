@@ -39,7 +39,7 @@ final class WeatherManager {
     
     
     func getForecast(latitude: CLLocationDegrees, longitude: CLLocationDegrees) async throws -> DailyResponseBody {
-        guard let forecastURL = URL(string: "https://api.openweathermap.org/data/2.5/forecast/daily?lat=\(latitude)&lon=\(longitude)&cnt=5&appid=c815cd4cc1a1bdae098b147bc2f751b6&units=metric") else {
+        guard let forecastURL = URL(string: "https://api.openweathermap.org/data/2.5/forecast?lat=\(latitude)&lon=\(longitude)&appid=c815cd4cc1a1bdae098b147bc2f751b6&units=metric") else {
             fatalError("Wrong URL")
         }
         
@@ -58,7 +58,7 @@ final class WeatherManager {
         
         let decodedData =  try JSONDecoder().decode(DailyResponseBody.self, from: data)
         
-        print(decodedData)
+//        print(decodedData)
         
         return decodedData
     }

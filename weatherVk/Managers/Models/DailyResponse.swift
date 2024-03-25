@@ -18,12 +18,12 @@ struct WeatherResponse: Decodable {
     var icon: String
 }
 
-struct TemperatureResponse: Decodable {
-    var min: Double
-    var max: Double
+struct MainResponse: Decodable {
+    var temp_max: Double
+    var temp_min: Double
 }
 
 struct OndeDayResponse: Decodable {
-    var temp:TemperatureResponse
+    var main: MainResponse
     var weather: [WeatherResponse]
 }
