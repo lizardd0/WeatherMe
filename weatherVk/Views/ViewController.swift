@@ -8,7 +8,7 @@
 import UIKit
 
 class ViewController: UIViewController {
-    var locationManager = LocationManager()
+    var locationManager = LocationManager.shared
     var coordinatesLabel = UILabel()
     
     override func viewDidLoad() {

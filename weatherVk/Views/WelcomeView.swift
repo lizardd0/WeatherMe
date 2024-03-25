@@ -7,6 +7,7 @@
 
 import UIKit
 import CoreLocationUI
+import CoreLocation
 
 final class WelcomeViewController: UIViewController {
     private enum Constants {
@@ -16,19 +17,23 @@ final class WelcomeViewController: UIViewController {
         static let cornerRadiusShareButton: CGFloat = 25.0
     }
     
-    private let locationManager = LocationManager()
+    private let locationManager = LocationManager.shared
     private let welcomeLabel = UILabel()
     private let shareLocationButton = CLLocationButton()
+    private let activityIndicator = UIActivityIndicatorView(style: .large)
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        view.backgroundColor = .systemBackground
+        view.backgroundColor = .white
         
         configureWelcomeLabel()
         view.addSubview(welcomeLabel)
         
         configureLocationButton()
         view.addSubview(shareLocationButton)
+        
+        configureActivityIndicator()
+        view.addSubview(activityIndicator)
         
         configureConstraints()
     }
@@ -50,8 +55,40 @@ final class WelcomeViewController: UIViewController {
         shareLocationButton.translatesAutoresizingMaskIntoConstraints = false
     }
     
+//    @objc func getCurrentLocation() {
+//        activityIndicator.startAnimating()
+//        DispatchQueue.main.async {
+//            self.locationManager.requestLocation()
+//        }
+//        welcomeLabel.isHidden = true
+//        shareLocationButton.isHidden = true
+//        if let latitude = locationManager.location?.latitude,
+//           let longitude = locationManager.location?.longitude {
+//            let weatherViewController = WeatherViewController()
+//            self.present(weatherViewController, animated: true)
+//        }
+//    }
+    
     @objc func getCurrentLocation() {
+//        activityIndicator.startAnimating() // Старт индикатора загрузки
+        
         locationManager.requestLocation()
+        
+        if let location = locationManager.location {
+            let weatherViewController = WeatherViewController()
+            self.present(weatherViewController, animated: true)
+            
+            // Остановка и скрытие индикатора загрузки
+            activityIndicator.stopAnimating()
+        }
+        
+    }
+    
+    
+    
+    private func configureActivityIndicator() {
+        activityIndicator.color = .gray
+        activityIndicator.translatesAutoresizingMaskIntoConstraints = false
     }
     
     private func configureConstraints() {
@@ -60,7 +97,11 @@ final class WelcomeViewController: UIViewController {
             welcomeLabel.centerYAnchor.constraint(equalTo: view.centerYAnchor),
             
             shareLocationButton.centerXAnchor.constraint(equalTo: view.centerXAnchor),
-            shareLocationButton.topAnchor.constraint(equalTo: welcomeLabel.bottomAnchor, constant: 50)
+            shareLocationButton.topAnchor.constraint(equalTo: welcomeLabel.bottomAnchor, constant: 50),
+            
+            activityIndicator.centerXAnchor.constraint(equalTo: view.centerXAnchor),
+            activityIndicator.centerYAnchor.constraint(equalTo: view.centerYAnchor)
         ])
     }
 }
+
